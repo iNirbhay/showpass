@@ -1,0 +1,9 @@
+-- Migration 003: Rich Movie Metadata for District-style experience
+ALTER TABLE events ADD COLUMN IF NOT EXISTS certification VARCHAR(20) DEFAULT 'U';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS language VARCHAR(100) DEFAULT 'Hindi';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS duration VARCHAR(30) DEFAULT '2h 15m';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS genres JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS release_date VARCHAR(50);
+ALTER TABLE events ADD COLUMN IF NOT EXISTS backdrop_url TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS cast_members JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS reviews JSONB DEFAULT '[]'::jsonb;

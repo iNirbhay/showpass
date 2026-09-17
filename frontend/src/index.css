@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --bg-surface-elevated: #F1F5F9;
+    --border-subtle: #E2E8F0;
+    --brand-gold: #F59E0B;
+    --brand-amber: #FBBF24;
+    --brand-teal: #F59E0B;
+    --brand-mint: #FBBF24;
+    --brand-crimson: #F59E0B;
+    --brand-crimson-hover: #D97706;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+  }
+
+  body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: "Outfit", "Plus Jakarta Sans", system-ui, sans-serif;
+    color: #0F172A;
+  }
+
+  .font-mono, .tabular-nums {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom Minimalist Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Authentic Curved Cinema Projection Arc */
+.screen-arc {
+  height: 14px;
+  width: 82%;
+  max-width: 680px;
+  margin: 0 auto;
+  border-top: 2.5px solid #F59E0B;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  box-shadow: 0 -4px 14px -2px rgba(245, 158, 11, 0.28);
+}
+
+/* Perforated ticket divider for Digital Tickets */
+.ticket-tear-line {
+  background-image: linear-gradient(to right, #CBD5E1 50%, rgba(255, 255, 255, 0) 0%);
+  background-position: bottom;
+  background-size: 12px 2px;
+  background-repeat: repeat-x;
+}
+
+/* Clean & Modern Micro-Interactions */
+.btn-primary {
+  @apply relative inline-flex items-center justify-center font-bold text-slate-950 bg-amber-400 hover:bg-amber-500 active:bg-amber-600 rounded-xl transition-all duration-150 active:scale-[0.98] shadow-sm hover:shadow;
+}
+
+.btn-secondary {
+  @apply relative inline-flex items-center justify-center font-semibold text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 hover:border-slate-300 rounded-xl transition-all duration-150 active:scale-[0.98] shadow-sm;
+}
+
+.btn-ghost {
+  @apply relative inline-flex items-center justify-center font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all duration-150;
+}
+
+/* Printable Styles for Admission Passes */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  nav, footer, button {
+    display: none !important;
+  }
+}

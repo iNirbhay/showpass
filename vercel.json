@@ -11,45 +11,15 @@
   },
   "rewrites": [
     {
-      "source": "/api",
+      "source": "/api/(.*)?",
       "destination": {
-        "service": "backend",
-        "path": "/api"
-      }
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": {
-        "service": "backend",
-        "path": "/api/$1"
-      }
-    },
-    {
-      "source": "/assets/(.*)",
-      "destination": {
-        "service": "frontend",
-        "path": "/assets/$1"
-      }
-    },
-    {
-      "source": "/posters/(.*)",
-      "destination": {
-        "service": "frontend",
-        "path": "/posters/$1"
-      }
-    },
-    {
-      "source": "/([^/]+\\.[a-zA-Z0-9]+)",
-      "destination": {
-        "service": "frontend",
-        "path": "/$1"
+        "service": "backend"
       }
     },
     {
       "source": "/(.*)",
       "destination": {
-        "service": "frontend",
-        "path": "/index.html"
+        "service": "frontend"
       }
     }
   ]

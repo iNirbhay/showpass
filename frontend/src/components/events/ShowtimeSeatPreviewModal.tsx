@@ -197,8 +197,9 @@ export const ShowtimeSeatPreviewModal: React.FC<ShowtimeSeatPreviewModalProps> =
             </div>
 
             {/* Seat Grid Layout */}
-            <div className="overflow-x-auto pb-2 flex flex-col items-center gap-1.5">
-              {seatLayout.map((row, rIdx) => (
+            <div className="w-full overflow-x-auto pb-2 scrollbar-none touch-pan-x">
+              <div className="w-max mx-auto space-y-1.5">
+                {seatLayout.map((row, rIdx) => (
                 <div key={rIdx} className="flex items-center gap-1">
                   <span className="w-4 text-[9px] font-mono font-bold text-slate-500 text-right">
                     {row[0].row}
@@ -228,6 +229,7 @@ export const ShowtimeSeatPreviewModal: React.FC<ShowtimeSeatPreviewModalProps> =
                   </span>
                 </div>
               ))}
+              </div>
             </div>
 
             {/* Matrix Legend */}

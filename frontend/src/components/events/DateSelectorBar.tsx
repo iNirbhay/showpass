@@ -141,7 +141,7 @@ export const DateSelectorBar: React.FC<DateSelectorBarProps> = ({
 
           {/* Popover Calendar Modal */}
           {calendarOpen && (
-            <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 bg-white rounded-3xl p-5 border border-slate-200 shadow-2xl animate-scalePop">
+            <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 max-w-[calc(100vw-32px)] bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-2xl animate-scalePop">
               {/* Header */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <span className="font-display font-bold text-sm text-slate-900">

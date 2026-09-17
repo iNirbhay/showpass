@@ -315,10 +315,23 @@ export const Navbar: React.FC = () => {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-2 text-xs shadow-lg">
-          <div className="flex items-center gap-2 pb-3 mb-2 border-b border-slate-100">
-            <MapPin className="w-4 h-4 text-amber-500" />
-            <span className="font-bold text-slate-900">Gurugram, Haryana</span>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              setIsSelectorOpen(true);
+            }}
+            className="w-full flex items-center justify-between pb-3 mb-2 border-b border-slate-100 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-amber-500" />
+              <div className="flex flex-col">
+                <span className="font-bold text-slate-900">{currentCity.name}</span>
+                <span className="text-[10px] text-slate-500">{currentCity.state}</span>
+              </div>
+            </div>
+            <span className="text-[11px] font-semibold text-amber-600">Change</span>
+          </button>
 
           <Link
             to="/events"

@@ -366,9 +366,9 @@ export const EventDetailPage: React.FC = () => {
 
                 {/* Showtimes & Seat Availability Trigger */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                      Available Showtimes • Click to preview seat layout & remaining seats
+                      Available Showtimes • Click to preview seats
                     </span>
                     <span className="text-[11px] text-amber-700 font-medium flex items-center gap-1">
                       <Eye className="w-3 h-3" />

@@ -244,7 +244,7 @@ export const SeatSelectionPage: React.FC = () => {
       </section>
 
       {/* 2. THREE-COLUMN AUDITORIUM CHAMBER (Image 3 Reference) */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 lg:pb-8">
         {/* Error Alert */}
         {errorMessage && (
           <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between animate-fadeIn">
@@ -411,6 +411,40 @@ export const SeatSelectionPage: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Mobile Floating Sticky Bottom Bar for Quick Checkout */}
+      {selectedSeats.length > 0 && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0C101A]/95 border-t border-slate-800 backdrop-blur-xl px-4 py-3.5 shadow-2xl animate-slideUp">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col">
+              <span className="text-[11px] text-slate-400 font-medium">
+                {selectedSeats.length} {selectedSeats.length === 1 ? 'seat' : 'seats'} selected
+              </span>
+              <span className="font-mono font-black text-lg text-amber-400">
+                ₹{grandTotal}
+              </span>
+            </div>
+
+            <button
+              onClick={handleProceedToCheckout}
+              disabled={reserveMutation.isPending}
+              className="py-2.5 px-5 rounded-xl font-bold text-xs bg-amber-400 hover:bg-amber-500 text-slate-950 flex items-center gap-1.5 shadow-lg shadow-amber-400/20 active:scale-95 transition"
+            >
+              {reserveMutation.isPending ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Locking...</span>
+                </>
+              ) : (
+                <>
+                  <span>Pay Now</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

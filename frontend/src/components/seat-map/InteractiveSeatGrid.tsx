@@ -140,8 +140,8 @@ export const InteractiveSeatGrid: React.FC<InteractiveSeatGridProps> = ({
       </div>
 
       {/* 2. Seating Grid with Crown & Star Tier Indicators */}
-      <div className="w-full overflow-x-auto pb-4 flex justify-center scrollbar-none">
-        <div className="min-w-fit px-2 sm:px-4 space-y-2.5">
+      <div className="w-full overflow-x-auto pb-4 scrollbar-none touch-pan-x">
+        <div className="w-max mx-auto px-2 sm:px-4 space-y-2.5">
           {activeRows.map((row, rIdx) => {
             return (
               <div key={row.rowLabel} className="space-y-1">

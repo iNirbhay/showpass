@@ -41,6 +41,11 @@ for (const route of routes) {
   const targetDir = path.join(distDir, route);
   fs.mkdirSync(targetDir, { recursive: true });
   fs.writeFileSync(path.join(targetDir, 'index.html'), indexHtml);
+
+  // Write route.html for cleanUrls mapping (e.g. dist/events.html)
+  if (!route.includes('/')) {
+    fs.writeFileSync(path.join(distDir, `${route}.html`), indexHtml);
+  }
 }
 
-console.log(`✅ Generated ${routes.length} static SPA route entry points in frontend/dist/`);
+console.log(`✅ Generated ${routes.length} static SPA route entry points (both directories and .html files) in frontend/dist/`);

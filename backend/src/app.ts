@@ -10,7 +10,7 @@ import { seatRoutes } from './modules/seats/seat.routes';
 import { bookingRoutes } from './modules/bookings/booking.routes';
 import { paymentRoutes } from './modules/payments/payment.routes';
 import { errorHandler } from './middleware/error.middleware';
-import { initDatabase } from './config/database';
+import { initDatabase, getDatabase } from './config/database';
 
 let dbReadyPromise: Promise<any> | null = null;
 
@@ -68,10 +68,27 @@ export function createApp(): express.Application {
   configurePassport();
   app.use(passport.initialize());
 
-  // Health check
-  app.get('/api/health', (_req: Request, res: Response) => {
+  // Health check with database diagnostics
+  app.get('/api/health', async (_req: Request, res: Response) => {
+    let dbStatus = 'ready';
+    let dbError = null;
+    try {
+      await ensureDatabaseReady();
+      const db = getDatabase();
+      await db.query('SELECT 1');
+    } catch (err: any) {
+      dbStatus = 'error';
+      dbError = {
+        message: err.message,
+        stack: err.stack,
+        code: err.code,
+      };
+    }
+
     res.status(200).json({
       status: 'healthy',
+      database: dbStatus,
+      dbError,
       timestamp: new Date().toISOString(),
       version: '1.0.0',
     });

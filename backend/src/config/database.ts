@@ -1,8 +1,15 @@
 import { Pool, PoolClient } from 'pg';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { env } from './env';
 import { logger } from '../utils/logger';
+import {
+  MIGRATION_001_SQL,
+  MIGRATION_002_SQL,
+  MIGRATION_003_SQL,
+  MIGRATION_004_SQL,
+} from '../db/migrations/migrationQueries';
 
 export interface DatabaseClient {
   query: (text: string, params?: any[]) => Promise<{ rows: any[]; rowCount?: number | null }>;
@@ -33,13 +40,26 @@ export async function initDatabase(): Promise<DatabaseClient> {
     logger.info('Initializing embedded PostgreSQL engine (@electric-sql/pglite)...');
     const { PGlite } = await import('@electric-sql/pglite');
     
-    // Store data in a persistent local directory or in-memory
-    const dbDir = path.resolve(__dirname, '../../pgdata');
+    // Store data in a persistent local directory or in-memory /tmp for serverless
+    const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
+    const dbDir = isServerless
+      ? path.join(os.tmpdir(), 'cintel-pgdata')
+      : path.resolve(__dirname, '../../pgdata');
+
     if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true });
+      try {
+        fs.mkdirSync(dbDir, { recursive: true });
+      } catch (err: any) {
+        logger.warn(`Could not create directory ${dbDir}, PGlite will initialize in memory: ${err.message}`);
+      }
     }
     
-    pgliteInstance = new PGlite(dbDir);
+    try {
+      pgliteInstance = new PGlite(dbDir);
+    } catch {
+      // Fallback to pure in-memory if disk access fails
+      pgliteInstance = new PGlite();
+    }
     await pgliteInstance.waitReady;
     logger.info('Embedded PostgreSQL engine initialized successfully.');
   }
@@ -75,53 +95,56 @@ export function getDatabase(): DatabaseClient {
   throw new Error('Database has not been initialized. Call initDatabase() first.');
 }
 
+function getMigrationSql(filePath: string, fallbackSql: string): string {
+  if (fs.existsSync(filePath)) {
+    try {
+      return fs.readFileSync(filePath, 'utf8');
+    } catch {
+      return fallbackSql;
+    }
+  }
+  return fallbackSql;
+}
+
 async function runMigrations(db: DatabaseClient) {
   try {
     logger.info('Checking and applying database migrations...');
     const migration1Path = path.resolve(__dirname, '../db/migrations/001_initial_schema.sql');
     const migration2Path = path.resolve(__dirname, '../db/migrations/002_rpc_booking_functions.sql');
     const migration3Path = path.resolve(__dirname, '../db/migrations/003_movie_rich_metadata.sql');
-
-    if (fs.existsSync(migration1Path)) {
-      const sql1 = fs.readFileSync(migration1Path, 'utf8');
-      if (db.isPGlite && pgliteInstance) {
-        await pgliteInstance.exec(sql1);
-      } else {
-        await db.query(sql1);
-      }
-      logger.info('Migration 001_initial_schema.sql applied.');
-    }
-
-    if (fs.existsSync(migration2Path)) {
-      const sql2 = fs.readFileSync(migration2Path, 'utf8');
-      if (db.isPGlite && pgliteInstance) {
-        await pgliteInstance.exec(sql2);
-      } else {
-        await db.query(sql2);
-      }
-      logger.info('Migration 002_rpc_booking_functions.sql applied.');
-    }
-
-    if (fs.existsSync(migration3Path)) {
-      const sql3 = fs.readFileSync(migration3Path, 'utf8');
-      if (db.isPGlite && pgliteInstance) {
-        await pgliteInstance.exec(sql3);
-      } else {
-        await db.query(sql3);
-      }
-      logger.info('Migration 003_movie_rich_metadata.sql applied.');
-    }
-
     const migration4Path = path.resolve(__dirname, '../db/migrations/004_booking_show_date.sql');
-    if (fs.existsSync(migration4Path)) {
-      const sql4 = fs.readFileSync(migration4Path, 'utf8');
-      if (db.isPGlite && pgliteInstance) {
-        await pgliteInstance.exec(sql4);
-      } else {
-        await db.query(sql4);
-      }
-      logger.info('Migration 004_booking_show_date.sql applied.');
+
+    const sql1 = getMigrationSql(migration1Path, MIGRATION_001_SQL);
+    if (db.isPGlite && pgliteInstance) {
+      await pgliteInstance.exec(sql1);
+    } else {
+      await db.query(sql1);
     }
+    logger.info('Migration 001_initial_schema.sql applied.');
+
+    const sql2 = getMigrationSql(migration2Path, MIGRATION_002_SQL);
+    if (db.isPGlite && pgliteInstance) {
+      await pgliteInstance.exec(sql2);
+    } else {
+      await db.query(sql2);
+    }
+    logger.info('Migration 002_rpc_booking_functions.sql applied.');
+
+    const sql3 = getMigrationSql(migration3Path, MIGRATION_003_SQL);
+    if (db.isPGlite && pgliteInstance) {
+      await pgliteInstance.exec(sql3);
+    } else {
+      await db.query(sql3);
+    }
+    logger.info('Migration 003_movie_rich_metadata.sql applied.');
+
+    const sql4 = getMigrationSql(migration4Path, MIGRATION_004_SQL);
+    if (db.isPGlite && pgliteInstance) {
+      await pgliteInstance.exec(sql4);
+    } else {
+      await db.query(sql4);
+    }
+    logger.info('Migration 004_booking_show_date.sql applied.');
 
     // Auto-seed if empty
     await autoSeedIfEmpty(db);

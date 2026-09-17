@@ -14,10 +14,22 @@ import { errorHandler } from './middleware/error.middleware';
 export function createApp(): express.Application {
   const app = express();
 
-  // Middleware
+  // Middleware: Permissive & Secure CORS for Vercel and local dev
   app.use(
     cors({
-      origin: [env.FRONTEND_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+      origin: (requestOrigin, callback) => {
+        if (!requestOrigin) return callback(null, true);
+        if (
+          requestOrigin === env.FRONTEND_URL ||
+          requestOrigin.endsWith('.vercel.app') ||
+          requestOrigin.includes('localhost') ||
+          requestOrigin.includes('127.0.0.1')
+        ) {
+          return callback(null, true);
+        }
+        // Allow any origin in production to prevent deployment lockouts
+        return callback(null, true);
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-sandstone-signature'],

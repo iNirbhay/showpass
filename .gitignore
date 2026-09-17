@@ -27,3 +27,8 @@ pnpm-debug.log*
 
 # Testing / coverage
 coverage/
+
+# Local database data
+backend/pgdata/
+pgdata/
+*.tsbuildinfo

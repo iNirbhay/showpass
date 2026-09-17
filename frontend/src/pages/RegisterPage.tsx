@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Ticket, Lock, Mail, User, Shield, AlertCircle, Loader2, Film, CheckCircle2 } from 'lucide-react';
+import { GoogleSignInModal } from '../components/auth/GoogleSignInModal';
 
 export const RegisterPage: React.FC = () => {
-  const { register } = useAuth();
+  const { register, loginWithGoogleSimulated } = useAuth();
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState('');
@@ -12,6 +13,7 @@ export const RegisterPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'CUSTOMER' | 'ORGANIZER'>('CUSTOMER');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,6 +26,20 @@ export const RegisterPage: React.FC = () => {
       navigate('/');
     } catch (err: any) {
       setErrorMessage(err.response?.data?.message || 'Registration failed. Try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleAccountSelect = async (selectedEmail: string, selectedName: string) => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      await loginWithGoogleSimulated(selectedEmail, selectedName);
+      setIsGoogleModalOpen(false);
+      navigate('/');
+    } catch (err: any) {
+      setErrorMessage(err.response?.data?.message || 'Google sign-in failed');
     } finally {
       setIsLoading(false);
     }
@@ -54,6 +70,48 @@ export const RegisterPage: React.FC = () => {
             <span>{errorMessage}</span>
           </div>
         )}
+
+        {/* Google OAuth Button */}
+        <button
+          onClick={() => setIsGoogleModalOpen(true)}
+          disabled={isLoading}
+          className="w-full py-3 px-4 rounded-xl border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all flex items-center justify-center gap-3 shadow-2xs disabled:opacity-50 group active:scale-95 cursor-pointer"
+        >
+          {/* Google Color G SVG */}
+          <svg className="w-4 h-4" viewBox="0 0 24 24">
+            <path
+              fill="#EA4335"
+              d="M12 5c1.54 0 2.92.53 4.01 1.58l3-3A11.96 11.96 0 0 0 12 0C7.39 0 3.42 2.61 1.47 6.42l3.66 2.84C6.01 6.64 8.76 5 12 5z"
+            />
+            <path
+              fill="#4285F4"
+              d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58l3.69 2.86c2.16-1.99 3.41-4.92 3.41-8.68z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.13 14.74A7.2 7.2 0 0 1 4.75 12c0-.96.16-1.9.44-2.74L1.53 6.42A11.96 11.96 0 0 0 0 12c0 1.92.45 3.74 1.25 5.37l3.88-2.63z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.69-2.86c-1.08.72-2.45 1.16-4.24 1.16-3.24 0-5.99-2.14-6.87-5.02L1.47 17.58C3.42 21.39 7.39 24 12 24z"
+            />
+          </svg>
+          <span>Sign up with Google</span>
+        </button>
+
+        <div className="relative flex items-center justify-center">
+          <div className="w-full border-t border-slate-200"></div>
+          <span className="bg-white px-3 text-[10px] text-slate-400 uppercase font-semibold tracking-wider">
+            Or register with email
+          </span>
+        </div>
+
+        <GoogleSignInModal
+          isOpen={isGoogleModalOpen}
+          onClose={() => setIsGoogleModalOpen(false)}
+          onSelectAccount={handleGoogleAccountSelect}
+          isLoading={isLoading}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

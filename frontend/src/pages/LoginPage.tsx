@@ -3,6 +3,8 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Ticket, Lock, Mail, ArrowRight, Sparkles, AlertCircle, Loader2, Film, ShieldCheck } from 'lucide-react';
 
+import { GoogleSignInModal } from '../components/auth/GoogleSignInModal';
+
 export const LoginPage: React.FC = () => {
   const { login, loginWithGoogleSimulated } = useAuth();
   const navigate = useNavigate();
@@ -12,6 +14,7 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,38 +32,15 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleQuickLogin = async (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('password123');
+  const handleGoogleAccountSelect = async (selectedEmail: string, selectedName: string) => {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      await login(demoEmail, 'password123');
+      await loginWithGoogleSimulated(selectedEmail, selectedName);
+      setIsGoogleModalOpen(false);
       navigate(redirect);
     } catch (err: any) {
-      setErrorMessage(err.response?.data?.message || 'Login failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleAuth = async () => {
-    setIsLoading(true);
-    setErrorMessage(null);
-    try {
-      // Check if backend has live Google OAuth configured
-      const checkRes = await fetch('/api/auth/google', { method: 'GET' }).catch(() => null);
-      if (checkRes && checkRes.status !== 501 && !checkRes.redirected) {
-        // Live Google OAuth endpoint is ready - redirect to passport consent screen
-        window.location.href = '/api/auth/google';
-        return;
-      }
-
-      // Seamless verified Google user handshake via backend OAuth simulation
-      await loginWithGoogleSimulated('alex.rivers@gmail.com', 'Alex Rivers');
-      navigate(redirect);
-    } catch (err: any) {
-      setErrorMessage(err.response?.data?.message || 'Google sign-in handshake failed');
+      setErrorMessage(err.response?.data?.message || 'Google sign-in failed');
     } finally {
       setIsLoading(false);
     }
@@ -94,9 +74,9 @@ export const LoginPage: React.FC = () => {
 
         {/* Google OAuth Button */}
         <button
-          onClick={handleGoogleAuth}
+          onClick={() => setIsGoogleModalOpen(true)}
           disabled={isLoading}
-          className="w-full py-3 px-4 rounded-xl border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all flex items-center justify-center gap-3 shadow-2xs disabled:opacity-50 group active:scale-95"
+          className="w-full py-3 px-4 rounded-xl border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all flex items-center justify-center gap-3 shadow-2xs disabled:opacity-50 group active:scale-95 cursor-pointer"
         >
           {/* Google Color G SVG */}
           <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -162,37 +142,18 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 rounded-xl font-bold text-sm text-slate-950 bg-amber-400 hover:bg-amber-500 transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
+            className="w-full py-3.5 rounded-xl font-bold text-sm text-slate-950 bg-amber-400 hover:bg-amber-500 transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 cursor-pointer"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin text-slate-950" /> : <span>Sign In</span>}
           </button>
         </form>
 
-        {/* Demo Accounts Quick-Fill Box */}
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
-              ⚡ 1-Click Evaluation Accounts
-            </span>
-            <span className="text-[9px] font-mono text-emerald-700 font-semibold">Auto Fill & Log In</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2.5">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('organizer@showpass.com')}
-              className="py-2 px-3 rounded-xl bg-white hover:bg-amber-50 text-[11px] font-bold text-amber-800 border border-amber-300 text-center transition truncate shadow-2xs"
-            >
-              Organizer Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('john@example.com')}
-              className="py-2 px-3 rounded-xl bg-white hover:bg-amber-50 text-[11px] font-bold text-slate-800 border border-slate-300 hover:border-amber-400 text-center transition truncate shadow-2xs"
-            >
-              Customer Demo
-            </button>
-          </div>
-        </div>
+        <GoogleSignInModal
+          isOpen={isGoogleModalOpen}
+          onClose={() => setIsGoogleModalOpen(false)}
+          onSelectAccount={handleGoogleAccountSelect}
+          isLoading={isLoading}
+        />
 
         {/* Bottom register link */}
         <div className="text-center pt-1 border-t border-slate-100">

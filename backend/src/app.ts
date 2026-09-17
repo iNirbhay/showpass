@@ -83,3 +83,6 @@ export function createApp(): express.Application {
 
   return app;
 }
+
+const defaultApp = createApp();
+export default defaultApp;

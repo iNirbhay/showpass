@@ -10,6 +10,20 @@ import { seatRoutes } from './modules/seats/seat.routes';
 import { bookingRoutes } from './modules/bookings/booking.routes';
 import { paymentRoutes } from './modules/payments/payment.routes';
 import { errorHandler } from './middleware/error.middleware';
+import { initDatabase } from './config/database';
+
+let dbReadyPromise: Promise<any> | null = null;
+
+export function ensureDatabaseReady(): Promise<any> {
+  if (!dbReadyPromise) {
+    dbReadyPromise = initDatabase().catch((err) => {
+      console.error('Failed to initialize database:', err);
+      dbReadyPromise = null;
+      throw err;
+    });
+  }
+  return dbReadyPromise;
+}
 
 export function createApp(): express.Application {
   const app = express();
@@ -61,6 +75,17 @@ export function createApp(): express.Application {
       timestamp: new Date().toISOString(),
       version: '1.0.0',
     });
+  });
+
+  // Ensure database and migrations are ready before handling any API requests
+  app.use('/api', async (req: Request, _res: Response, next: express.NextFunction) => {
+    if (req.path === '/health') return next();
+    try {
+      await ensureDatabaseReady();
+      next();
+    } catch (err) {
+      next(err);
+    }
   });
 
   // API Routes

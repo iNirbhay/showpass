@@ -11,17 +11,18 @@ async function startServer() {
     // 1. Initialize Database & Run Migrations
     await initDatabase();
 
-    // 2. Start HTTP Server only in persistent server environments
-    if (!isServerless) {
-      const server = app.listen(env.PORT, () => {
-        logger.info(`================================================`);
-        logger.info(`🚀 ShowPass Server running on http://localhost:${env.PORT}`);
-        logger.info(`💳 Sandstone Merchant: ${env.SANDSTONE_MERCHANT_ID}`);
-        logger.info(`🛡️ Concurrency Lock: Database-Level RPC & Partial Unique Index Active`);
-        logger.info(`================================================`);
-      });
+    // 2. Start HTTP Server (Listens on process.env.PORT for Vercel and local dev)
+    const port = Number(process.env.PORT) || env.PORT || 5001;
+    const server = app.listen(port, () => {
+      logger.info(`================================================`);
+      logger.info(`🚀 ShowPass Server running on port ${port}`);
+      logger.info(`💳 Sandstone Merchant: ${env.SANDSTONE_MERCHANT_ID}`);
+      logger.info(`🛡️ Concurrency Lock: Database-Level RPC & Partial Unique Index Active`);
+      logger.info(`================================================`);
+    });
 
-      // 3. Background Job: Cleanup expired seat holds every 30 seconds
+    // 3. Background Job: Cleanup expired seat holds every 30 seconds
+    if (!isServerless) {
       const cleanupInterval = setInterval(async () => {
         try {
           const db = getDatabase();
